@@ -1,3 +1,72 @@
 <resources>
-    <string name="app_name">GS.HTTP</string>
+    <string name="app_name">GS HTTP</string>
+
+    <string name="info">Информация</string>
+    <string name="dev_site">Сайт разработчика</string>
+    <string name="settings">Настройки</string>
+    <string name="settings_title">Настройки приложения</string>
+    <string name="network_section">Сеть и подключение</string>
+    <string name="ssl_section">Безопасность и SSL</string>
+    <string name="developer">Разработчик: Георгий Смердов</string>
+    <string name="version">Версия</string>
+    <string name="downloaded_from">Скачано: RuStore</string>
+    <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="source_code">Исходный код</string>
+
+    <string name="nav_home">Главная</string>
+    <string name="nav_scanner">Сканер URL</string>
+
+    <string name="btn_scan">Запустить скан</string>
+    <string name="btn_back">← Вернуться</string>
+    <string name="btn_open_browser">Открыть в браузере</string>
+    <string name="btn_open_browser_emoji">Открыть сайт в браузере</string>
+    <string name="btn_search_data">Поиск по данным ответа</string>
+    <string name="btn_done">Готово</string>
+
+    <string name="placeholder_url">Проверить URL</string>
+    <string name="search_log_placeholder">Поиск текста внутри лога...</string>
+
+    <string name="status_error">Ошибка</string>
+    <string name="status_invalid">Некорректный ввод</string>
+    <string name="status_ssl">Безопасно (SSL)</string>
+    <string name="status_http">Небезопасно (HTTP)</string>
+    <string name="status_no_server">Сервер недоступен</string>
+
+    <string name="auto_redirect">Авто-редирект</string>
+    <string name="auto_redirect_sub">Следовать перенаправлениям сайтов</string>
+    <string name="timeout_label">Таймаут запроса</string>
+    <string name="verify_ssl">Проверять SSL</string>
+    <string name="verify_ssl_sub">строгая проверка сертификата</string>
+    <string name="ignore_ssl">Игнорировать SSL ошибки</string>
+    <string name="ignore_ssl_sub">самоподписанные сертификаты</string>
+    <string name="user_agent">User-Agent</string>
+    <string name="user_agent_default">По умолчанию</string>
+    <string name="clear_history">Очистить историю ввода</string>
+
+    <string name="theme_btn">Тема оформления</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+
+    <string name="lang_btn">Язык: Русский</string>
+    <string name="lang_title">Выберите язык</string>
+    <string name="lang_error_save">Ошибка сохранения</string>
+
+    <string name="history_title">История запросов</string>
+    <string name="history_empty">История пока пуста</string>
+    <string name="inspector_title">Данные ответа сервера</string>
+
+    <string name="not_found">Ничего не найдено</string>
+    <string name="search_error">Ошибка поиска (error)</string>
+    <string name="search_too_big">Ошибка: Лог слишком большой</string>
+    <string name="cookies_empty">Куки отсутствуют</string>
+    <string name="body_empty">Тело ответа пусто</string>
+    <string name="no_data">Нет данных</string>
+    <string name="default_user">По умолчанию</string>
+
+
+    <string name="cancel">Отмена</string>
 </resources>
+
+
+

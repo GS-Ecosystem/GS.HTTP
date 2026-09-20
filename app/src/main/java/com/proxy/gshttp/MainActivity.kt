@@ -4,9 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.flet.gshttp.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.*
@@ -19,13 +23,22 @@ import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-const val VERSION = "1.0.6"
-const val SDK_ID = "YOUR_SDK_ID"
-
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val savedLang = prefs.getString("app_lang", "ru") ?: "ru"
+
+
+        val locale = java.util.Locale(savedLang)
+        java.util.Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+
         setContent {
             var appThemeSetting by remember { mutableStateOf("system") }
 
@@ -36,7 +49,10 @@ class MainActivity : ComponentActivity() {
             }
 
             MyApplicationTheme(darkTheme = isDarkTheme) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     MainAppScreen(
                         themeSetting = appThemeSetting,
                         onThemeChange = { appThemeSetting = it }
@@ -46,6 +62,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
 fun trackEvent(context: Context, scope: CoroutineScope, eventName: String) {
     scope.launch(Dispatchers.IO) {
         val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -61,7 +79,7 @@ fun trackEvent(context: Context, scope: CoroutineScope, eventName: String) {
 
         val jsonArray = JSONArray().apply {
             put(JSONObject().apply {
-                put("idApp", SDK_ID)
+                put("idApp",)
                 put("customEventName", eventName)
                 put("lvid", lvid)
                 put("ts", System.currentTimeMillis() / 1000)
@@ -76,3 +94,4 @@ fun trackEvent(context: Context, scope: CoroutineScope, eventName: String) {
         try { client.newCall(request).execute().close() } catch (e: Exception) {}
     }
 }
+

@@ -33,13 +33,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-
+import androidx.compose.ui.res.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoBottomSheetDialog(
     version: String,
     sheetState: SheetState,
-    strings: Map<String, String>,
     bgColor: Color,
     textColorPrimary: Color,
     textColorSecondary: Color,
@@ -64,7 +63,7 @@ fun InfoBottomSheetDialog(
             )
             Spacer(modifier = Modifier.height(15.dp))
             Text(
-                text = strings["info"] ?: "Information",
+                text = stringResource(R.string.info),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = textColorPrimary
@@ -92,18 +91,18 @@ fun InfoBottomSheetDialog(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = strings["developer"] ?: "Developer: Georgy Smerdov",
+                text = stringResource(R.string.developer),
                 fontSize = 14.sp,
                 color = textColorSecondary
             )
             Text(
-                text = "${strings["version"] ?: "Version"}: $VERSION",
+                text = "${stringResource(R.string.version)}: $version",
                 fontSize = 12.sp,
                 color = textColorPrimary
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = strings["downloaded_from"] ?: "Downloaded from: GitHub",
+                text = stringResource(R.string.downloaded_from),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color = textColorSecondary
@@ -116,11 +115,11 @@ fun InfoBottomSheetDialog(
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextButton(onClick = {
-                uriHandler.openUri("https://gs-ht.ru/PRIVACY_GS.HTTP_EN.html")
+                uriHandler.openUri("https://gs-ht.ru/PRIVACY_GS.HTTP_RU.html")
 
             }) {
                 Text(
-                    text = strings["privacy_policy"] ?: "https://gs-ht.ru/",
+                    text = stringResource(R.string.privacy_policy),
                     color = textColorPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
@@ -134,7 +133,7 @@ fun InfoBottomSheetDialog(
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextButton(onClick = {
-                uriHandler.openUri("https://github.com/proto-gs/GS.HTTP")
+                uriHandler.openUri("https://github.com/GS-Ecosystem/GS.HTTP")
 
             }) {
                 Row(
@@ -149,7 +148,7 @@ fun InfoBottomSheetDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = strings["source_code"] ?: "Source Code",
+                        text = stringResource(R.string.source_code),
                         color = textColorPrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
