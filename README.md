@@ -6,27 +6,27 @@ GS HTTP is a lightweight and fast utility designed for checking HTTP requests.
 * [**GS.HTTP** on GitHub -> Releases](https://github.com/proto-gs/GS.HTTP/releases/tag/v1.0.6)
 # Information
 GS HTTP is a lightweight and fast utility designed specifically for web developers, system administrators, and anyone working with APIs and network requests.
-With GS HTTP, you can:
-• Instantly check the HTTP status of any website (200 OK, 404 Not Found, etc.).
-• View site server responses, which include: body, headers, and site cookies.
-• Open the verified website in a browser.
-This application includes all the necessary settings for your workflow:
-Network and connection:
-• Auto-redirect — a toggle switch that follows website redirects.
-• Request timeout — the ability to set the request duration up to 30 seconds.
-Security and SSL:
-• Verify SSL — a toggle switch for strict certificate verification.
-• Ignore SSL errors — a toggle switch for self-signed certificates.
-User-Agent — by default, a user-agent is used in HTTP/1.1, and although it is not required, it is available in the application settings.
-Personalization and input:
-Theme design — the ability to change the application theme to light, dark, or set it to match the system.
-Language — the application is translated and currently available in two languages: English and Russian.
-Clear history and input — allows you to clear the history and current input in the application's scanner menu.
-This application also features a history log:
-• It is saved in an isolated, secure folder on Android, which requires no storage permissions.
-• The history does not store a large number of requests yet; instead, it overwrites older ones.
-• It is unique because it is stored locally on the user's device—the application has no servers for storage, and data is not transferred to third parties.
-The scanner menu in the application supports all 9 popular methods:
+With GS HTTP, you can:<br><br>
+• Instantly check the HTTP status of any website (200 OK, 404 Not Found, etc.).<br>
+• View site server responses, which include: body, headers, and site cookies.<br>
+• Open the verified website in a browser.<br>
+This application includes all the necessary settings for your workflow:<br><br>
+Network and connection:<br>
+• Auto-redirect — a toggle switch that follows website redirects.<br>
+• Request timeout — the ability to set the request duration up to 30 seconds.<br>
+Security and SSL:<br>
+• Verify SSL — a toggle switch for strict certificate verification.<br>
+• Ignore SSL errors — a toggle switch for self-signed certificates.<br>
+User-Agent — by default, a user-agent is used in HTTP/1.1, and although it is not required, it is available in the application settings.<br>
+Personalization and input:<br>
+Theme design — the ability to change the application theme to light, dark, or set it to match the system.<br>
+Language — the application is translated and currently available in two languages: English and Russian.<br>
+Clear history and input — allows you to clear the history and current input in the application's scanner menu.<br>
+This application also features a history log:<br>
+• It is saved in an isolated, secure folder on Android, which requires no storage permissions.<br>
+• The history does not store a large number of requests yet; instead, it overwrites older ones.<br>
+• It is unique because it is stored locally on the user's device—the application has no servers for storage, and data is not transferred to third parties.<br><br>
+The scanner menu in the application supports all 9 popular methods:<br>
 GET, POST, HEAD, PUT, PATCH, DELETE, CONNECT, TRACE, OPTIONS
 ## Clone repository | Building app | Working with the project
 There are two full-time IDLE programs where you can easily open and work with a project:
