@@ -6,25 +6,28 @@ GS HTTP is a lightweight and fast utility designed for checking HTTP requests.
 * [**GS.HTTP** on GitHub -> Releases](https://github.com/proto-gs/GS.HTTP/releases/tag/v1.0.6)
 # Information
 GS HTTP is a lightweight and fast utility designed specifically for web developers, system administrators, and anyone working with APIs and network requests.
-
 With GS HTTP, you can:
-
 • Instantly check the HTTP status of any website (200 OK, 404 Not Found, etc.).
-
-• Analyze server response headers.
-
-• View and format JSON data in a convenient, readable format.
-
-• Check cookies set by web resources.
-
-The app is extremely minimalist: it doesn't require registration or collect personal data. Simply enter the website address and click "CHECK." All the necessary functionality is available immediately after launch. The perfect assistant for quickly diagnosing websites right from your smartphone.<br><br>
-Using GS.HTTP, you can also:
-
-• Control and manage application settings
-
-• Use popular HTTP methods: GET, POST, HEAD, PUT
-
-• Save everything locally in the request history
+• View site server responses, which include: body, headers, and site cookies.
+• Open the verified website in a browser.
+This application includes all the necessary settings for your workflow:
+Network and connection:
+• Auto-redirect — a toggle switch that follows website redirects.
+• Request timeout — the ability to set the request duration up to 30 seconds.
+Security and SSL:
+• Verify SSL — a toggle switch for strict certificate verification.
+• Ignore SSL errors — a toggle switch for self-signed certificates.
+User-Agent — by default, a user-agent is used in HTTP/1.1, and although it is not required, it is available in the application settings.
+Personalization and input:
+Theme design — the ability to change the application theme to light, dark, or set it to match the system.
+Language — the application is translated and currently available in two languages: English and Russian.
+Clear history and input — allows you to clear the history and current input in the application's scanner menu.
+This application also features a history log:
+• It is saved in an isolated, secure folder on Android, which requires no storage permissions.
+• The history does not store a large number of requests yet; instead, it overwrites older ones.
+• It is unique because it is stored locally on the user's device—the application has no servers for storage, and data is not transferred to third parties.
+The scanner menu in the application supports all 9 popular methods:
+GET, POST, HEAD, PUT, PATCH, DELETE, CONNECT, TRACE, OPTIONS
 ## Clone repository | Building app | Working with the project
 There are two full-time IDLE programs where you can easily open and work with a project:
 * [AndroidStudio](https://developer.android.com/studio)(recommended)
