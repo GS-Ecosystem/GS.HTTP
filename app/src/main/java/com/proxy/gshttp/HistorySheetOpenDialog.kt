@@ -65,13 +65,6 @@ fun HistorySheetOpenDialog (
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 40.dp, height = 4.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(textColorPrimary.copy(alpha = 0.2f))
-            )
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = stringResource(R.string.history_title),
                 fontWeight = FontWeight.Bold,

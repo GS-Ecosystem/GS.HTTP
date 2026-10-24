@@ -6,7 +6,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,20 +31,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -79,6 +75,23 @@ import kotlin.text.trim
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.core.content.edit
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.runtime.mutableFloatStateOf
+
+
+
 
 interface MonochromeColors {
     val bgPrimary: Color
@@ -97,6 +110,23 @@ fun MainAppScreen(
     onThemeChange: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val sharedPref = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
+    val saveSetting: (String, Any) -> Unit = { key, value ->
+        try {
+
+            sharedPref.edit {
+                when (value) {
+                    is Boolean -> putBoolean(key, value)
+                    is Float -> putFloat(key, value)
+                    is String -> putString(key, value)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
     val scope = rememberCoroutineScope()
     var isInfoDialogVisible by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -116,13 +146,9 @@ fun MainAppScreen(
 
 
     var currentView by remember { mutableStateOf("welcome") }
-    var isBottomSheetOpen by remember { mutableStateOf(false) }
-    var isSettingsSheetOpen by remember { mutableStateOf(false) }
-    var isMenuExpanded by remember { mutableStateOf(false) }
+    var isSettingsScreenOpen by remember { mutableStateOf(false) }
 
-    var requestTimeout by remember { mutableStateOf(10f) }
-    var verifySslSetting by remember { mutableStateOf(true) }
-    var ignoreSslSetting by remember { mutableStateOf(false) }
+    var requestTimeout by remember { mutableFloatStateOf(10f) }
 
     var isThemeDialogOpen by remember { mutableStateOf(false) }
     var urlInput by remember { mutableStateOf("") }
@@ -131,25 +157,24 @@ fun MainAppScreen(
     var safeText by remember { mutableStateOf("") }
     var safeTextColor by remember { mutableStateOf(Color.Unspecified) }
     var isLoading by remember { mutableStateOf(false) }
+    var requestBodyInput by remember { mutableStateOf("") }
+    var requestHeadersInput by remember { mutableStateOf("") }
 
 
     var searchHistory by remember { mutableStateOf(setOf<String>()) }
 
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = Unit) {
         val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         try {
             val savedHistory = sharedPref.getStringSet("local_search_history", emptySet())
-
-            searchHistory = savedHistory?.toSet()?.take(10)?.toSet() ?: emptySet()
-        } catch (e: Exception) {
+            searchHistory = savedHistory?.take(10)?.toSet() ?: emptySet()
+        } catch (_: Exception) {
             searchHistory = emptySet()
             try {
-
-                sharedPref.edit().remove("local_search_history").apply()
-            } catch (ex: Exception) {
-
+                sharedPref.edit { remove("local_search_history") }
+            } catch (_: Exception) {
             }
         }
     }
@@ -162,16 +187,14 @@ fun MainAppScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
-    val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val historySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val inspectorSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.5f
     var isHistorySheetOpen by remember { mutableStateOf(false) }
     var isResponseInspectorSheetOpen by remember { mutableStateOf(false) }
 
     var isScanPressed by remember { mutableStateOf(false) }
-    var activeSearchTab by remember { mutableStateOf("Body") }
+
 
     var userAgentInput by remember { mutableStateOf("GS.HTTP/1.0") }
     var requestTimeoutText by remember { mutableStateOf("10") }
@@ -281,8 +304,10 @@ fun MainAppScreen(
             scope.launch(Dispatchers.IO) {
                 try {
                     val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                    sharedPref.edit().remove("local_search_history").apply()
-                    sharedPref.edit().putStringSet("local_search_history", updatedHistory).apply()
+                    sharedPref.edit {
+                        remove("local_search_history")
+                        putStringSet("local_search_history", updatedHistory)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -304,29 +329,78 @@ fun MainAppScreen(
                         .url(fullUrl)
                         .header("User-Agent", currentAgent)
 
+
+                    if (requestHeadersInput.isNotBlank()) {
+                        requestHeadersInput.lines().forEach { line ->
+                            val parts = line.split(":", limit = 2)
+                            if (parts.size == 2) {
+                                val key = parts[0].trim()
+                                val value = parts[1].trim()
+                                if (key.isNotEmpty()) {
+                                    requestBuilder.addHeader(key, value)
+                                }
+                            }
+                        }
+                    }
+
+
                     val mediaType = "application/json; charset=utf-8".toMediaType()
-                    val emptyBody = ByteArray(0).toRequestBody(mediaType)
+                    val bodyBytes = requestBodyInput.toByteArray(Charsets.UTF_8)
+                    val requestBody = bodyBytes.toRequestBody(mediaType)
+
+
 
                     when (selectedMethod) {
                         "GET" -> requestBuilder.get()
-                        "POST" -> requestBuilder.post(emptyBody)
-                        "PUT" -> requestBuilder.put(emptyBody)
-                        "DELETE" -> requestBuilder.delete(emptyBody)
-                        "PATCH" -> requestBuilder.patch(emptyBody)
                         "HEAD" -> requestBuilder.head()
+
+
+                        "POST" -> requestBuilder.post(requestBody)
+                        "PUT" -> requestBuilder.put(requestBody)
+                        "DELETE" -> requestBuilder.delete(requestBody)
+                        "PATCH" -> requestBuilder.patch(requestBody)
+
+
                         "OPTIONS" -> requestBuilder.method("OPTIONS", null)
-                        "TRACE" -> requestBuilder.method("TRACE", null)
-                        "CONNECT" -> requestBuilder.method("CONNECT", null)
+
+                        "TRACE" -> {
+                            requestBuilder.removeHeader("Content-Type")
+                            requestBuilder.method("TRACE", null)
+                        }
+
+                        "CONNECT" -> {
+                            val emptyConnectBody = ByteArray(0).toRequestBody(null)
+                            requestBuilder.method("CONNECT", emptyConnectBody)
+                        }
                     }
 
+
+
+                    val startTime = System.currentTimeMillis()
+
                     client.newCall(requestBuilder.build()).execute().use { response ->
+                        val duration = System.currentTimeMillis() - startTime
+
                         val code = response.code
+                        val protocol = response.protocol
                         val isHttps = response.request.url.isHttps
+
+
                         val body = response.body?.string() ?: ""
-                        val headers = response.headers.joinToString("\n") { "${it.first}: ${it.second}" }
+
+
+                        val bodySizeInBytes = body.toByteArray(Charsets.UTF_8).size
+                        val sizeText = if (bodySizeInBytes >= 1024) {
+                            String.format("%.2f KB", bodySizeInBytes / 1024.0)
+                        } else {
+                            "$bodySizeInBytes Bytes"
+                        }
+
+
+                        val protocolLine = "${protocol.toString().uppercase()} $code ${response.message}"
+                        val headers = protocolLine + "\n" + response.headers.joinToString("\n") { "${it.first}: ${it.second}" }
+
                         val cookiesList = response.headers("Set-Cookie")
-
-
                         val cookies = if (cookiesList.isNotEmpty()) {
                             cookiesList.joinToString("\n")
                         } else {
@@ -334,29 +408,33 @@ fun MainAppScreen(
                         }
 
                         withContext(Dispatchers.Main) {
-                            resText = "HTTP $code"
+
+                            resText = "HTTP $code (${duration}ms, $sizeText)"
+
                             safeText = if (isHttps) {
                                 context.getString(R.string.status_ssl)
                             } else {
                                 context.getString(R.string.status_http)
                             }
+
                             responseBodyText = body
                             responseHeadersText = headers
                             responseCookiesText = cookies
                             lastValidUrl = fullUrl
                         }
                     }
-                } catch (e: IllegalArgumentException) {
+
+                } catch (_: IllegalArgumentException) {
                     withContext(Dispatchers.Main) {
                         resText = context.getString(R.string.status_error)
                         safeText = context.getString(R.string.status_invalid)
                     }
-                } catch (e: java.io.IOException) {
+                } catch (_: java.io.IOException) {
                     withContext(Dispatchers.Main) {
                         resText = context.getString(R.string.status_error)
                         safeText = context.getString(R.string.status_no_server)
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     withContext(Dispatchers.Main) {
                         resText = context.getString(R.string.status_error)
                         safeText = context.getString(R.string.status_error)
@@ -369,9 +447,6 @@ fun MainAppScreen(
             }
         }
     }
-
-
-
 
 
     var dragAmountSum by remember { mutableStateOf(0f) }
@@ -401,6 +476,31 @@ fun MainAppScreen(
                 )
             }
     ) {
+        val context = LocalContext.current
+        var lastBackPressTime by remember { mutableStateOf(0L) }
+
+
+        val exitSwipeText = stringResource(id = R.string.exit_swipe)
+
+
+        BackHandler(enabled = true) {
+            val currentTime = System.currentTimeMillis()
+
+            if (currentTime - lastBackPressTime < 2000) {
+                (context as? android.app.Activity)?.finish()
+            } else {
+
+                Toast.makeText(
+                    context,
+                    exitSwipeText,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                lastBackPressTime = currentTime
+            }
+        }
+
+
         if (currentView == "welcome") {
             Box(modifier = Modifier.fillMaxSize()) {
                 Box(
@@ -410,61 +510,13 @@ fun MainAppScreen(
                         .padding(top = 8.dp, end = 24.dp)
                 ) {
                     IconButton(
-                        onClick = { isMenuExpanded = true },
-                        modifier = Modifier.size(48.dp)
+                        onClick = { isInfoDialogVisible = true },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.Outlined.Info,
                             contentDescription = "Показать меню",
                             tint = palette.textSecondary,
                             modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false },
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(palette.bgSecondary)
-                            .border(1.dp, palette.line, RoundedCornerShape(16.dp)),
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(R.string.info),
-                                    color = palette.textPrimary
-                                )
-                            },
-                            onClick = { isMenuExpanded = false; isInfoDialogVisible = true }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(R.string.dev_site),
-                                    color = palette.textPrimary
-                                )
-                            },
-                            onClick = {
-                                isMenuExpanded = false
-                                try {
-                                    trackEvent(context, scope, "click_dev_site")
-                                    val intent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse("https://gs-ht.ru"))
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(R.string.settings),
-                                    color = palette.textPrimary
-                                )
-                            },
-                            onClick = { isMenuExpanded = false; isSettingsSheetOpen = true }
                         )
                     }
                 }
@@ -506,6 +558,28 @@ fun MainAppScreen(
                 }
             }
         } else if (currentView == "main") {
+
+            val methodsList = listOf(
+                "GET",
+                "POST",
+                "HEAD",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "OPTIONS",
+                "TRACE",
+                "CONNECT"
+            )
+            val pagerState = rememberPagerState(
+                pageCount = { methodsList.size }
+            )
+
+
+
+            LaunchedEffect(pagerState.currentPage) {
+                selectedMethod = methodsList[pagerState.currentPage]
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -527,7 +601,7 @@ fun MainAppScreen(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                    IconButton(onClick = { isSettingsSheetOpen = true }) {
+                    IconButton(onClick = { isSettingsScreenOpen = true }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
@@ -545,43 +619,33 @@ fun MainAppScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    val methodsList = listOf(
-                        "GET",
-                        "POST",
-                        "HEAD",
-                        "PUT",
-                        "DELETE",
-                        "PATCH",
-                        "OPTIONS",
-                        "TRACE",
-                        "CONNECT"
-                    )
-                    val currentMethodIndex = methodsList.indexOf(selectedMethod).coerceAtLeast(0)
-
 
                     ScrollableTabRow(
-                        selectedTabIndex = currentMethodIndex,
+                        selectedTabIndex = pagerState.currentPage,
                         containerColor = Color.Transparent,
                         contentColor = palette.textPrimary,
                         edgePadding = 0.dp,
                         indicator = { tabPositions ->
-                            if (currentMethodIndex < tabPositions.size) {
-                                TabRowDefaults.Indicator(
-                                    modifier = with(TabRowDefaults) {
-                                        Modifier.tabIndicatorOffset(tabPositions[currentMethodIndex])
-                                    },
+                            if (pagerState.currentPage < tabPositions.size) {
+                                TabRowDefaults.SecondaryIndicator(
+                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                                     color = palette.textPrimary,
                                     height = 3.dp
                                 )
+
                             }
                         },
                         divider = {}
                     ) {
                         methodsList.forEachIndexed { index, method ->
-                            val isSelected = currentMethodIndex == index
+                            val isSelected = pagerState.currentPage == index
+                            val scope = rememberCoroutineScope()
                             Tab(
                                 selected = isSelected,
-                                onClick = { selectedMethod = method },
+                                onClick = {
+
+                                    scope.launch { pagerState.animateScrollToPage(index) }
+                                },
                                 text = {
                                     Text(
                                         text = method,
@@ -593,50 +657,128 @@ fun MainAppScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(35.dp))
 
-                    TextField(
-                        value = urlInput,
-                        onValueChange = { urlInput = it },
-                        placeholder = {
-                            Text(
-                                stringResource(R.string.placeholder_url),
-                                color = palette.textSecondary.copy(alpha = 0.7f)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    HorizontalPager(
+                        state = pagerState,
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) { page ->
+                        val currentMethodForPage = methodsList[page]
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(top = 0.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+
+                            TextField(
+                                value = urlInput,
+                                onValueChange = { urlInput = it },
+                                placeholder = {
+                                    Text(
+                                        stringResource(R.string.placeholder_url),
+                                        color = palette.textSecondary.copy(alpha = 0.7f)
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = palette.textPrimary,
+                                    unfocusedIndicatorColor = palette.line,
+                                    focusedTextColor = palette.textPrimary,
+                                    unfocusedTextColor = palette.textPrimary
+                                )
                             )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = palette.textPrimary,
-                            unfocusedIndicatorColor = palette.line,
-                            focusedTextColor = palette.textPrimary,
-                            unfocusedTextColor = palette.textPrimary
-                        )
-                    )
 
-                    Spacer(modifier = Modifier.height(50.dp))
 
-                    if (!isLoading && resText.isNotEmpty()) {
-                        Text(
-                            resText,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Black,
-                            color = resTextColor,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            safeText,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = safeTextColor,
-                            textAlign = TextAlign.Center
-                        )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+
+                            if (currentMethodForPage != "CONNECT") {
+                                TextField(
+                                    value = requestHeadersInput,
+                                    onValueChange = { requestHeadersInput = it },
+                                    placeholder = {
+                                        Text(
+                                            "Headers (Key: Value на новой строке)",
+                                            color = palette.textSecondary.copy(alpha = 0.7f)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    maxLines = 3,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = palette.textPrimary,
+                                        unfocusedIndicatorColor = palette.line,
+                                        focusedTextColor = palette.textPrimary,
+                                        unfocusedTextColor = palette.textPrimary
+                                    )
+                                )
+                            }
+
+
+                            val methodsWithBody = listOf("POST", "PUT", "PATCH", "DELETE")
+                            if (currentMethodForPage in methodsWithBody) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                TextField(
+                                    value = requestBodyInput,
+                                    onValueChange = { requestBodyInput = it },
+                                    placeholder = {
+                                        Text(
+                                            "Request Body (JSON / Text)",
+                                            color = palette.textSecondary.copy(alpha = 0.7f)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    maxLines = 5,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = palette.textPrimary,
+                                        unfocusedIndicatorColor = palette.line,
+                                        focusedTextColor = palette.textPrimary,
+                                        unfocusedTextColor = palette.textPrimary
+                                    )
+                                )
+                            }
+
+
+                            if (!isLoading && resText.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Text(
+                                    text = resText,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = resTextColor,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = safeText,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = safeTextColor,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     }
                 }
+
 
                 Column(
                     modifier = Modifier
@@ -645,12 +787,13 @@ fun MainAppScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
                     if (!isLoading && lastValidUrl.isNotEmpty()) {
                         Button(
                             onClick = {
                                 try {
                                     val browserIntent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(lastValidUrl))
+                                        Intent(Intent.ACTION_VIEW, lastValidUrl.toUri())
                                     context.startActivity(browserIntent)
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -789,7 +932,7 @@ fun MainAppScreen(
                 }
             }
         }
-        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+        val uriHandler = LocalUriHandler.current
 
         if (isInfoDialogVisible) {
             InfoBottomSheetDialog(
@@ -808,26 +951,38 @@ fun MainAppScreen(
 
 
 
-        if (isSettingsSheetOpen) {
-            IsSettingsSheetOpen(
+        AnimatedVisibility(
+            visible = isSettingsScreenOpen,
+
+            enter = fadeIn(animationSpec = tween(durationMillis = 300)) + slideInHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                initialOffsetX = { fullWidth -> fullWidth }
+            ),
+
+            exit = fadeOut(animationSpec = tween(durationMillis = 300)) + slideOutHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                targetOffsetX = { fullWidth -> fullWidth }
+            )
+        ) {
+
+            BackHandler(enabled = isSettingsScreenOpen) {
+                isSettingsScreenOpen = false
+            }
+
+            SettingsScreen(
                 version = "1.0.7",
-                sheetState = settingsSheetState,
                 bgColor = palette.bgSecondary,
                 textColorPrimary = palette.textPrimary,
                 textColorSecondary = palette.textSecondary,
                 lineColor = palette.line,
                 uriHandler = LocalUriHandler.current,
                 themeSetting = themeSetting,
-                onDismiss = { isSettingsSheetOpen = false },
+                onBackClick = { isSettingsScreenOpen = false },
                 onThemeClick = { isThemeDialogOpen = true },
                 onLanguageClick = { isLanguageDialogOpen = true },
                 onClearHistory = { searchHistory = emptySet() }
             )
         }
-
-
-
-
 
 
         if (isHistorySheetOpen) {
@@ -854,13 +1009,6 @@ fun MainAppScreen(
         }
 
 
-
-
-
-
-
-
-
         if (isResponseInspectorSheetOpen) {
             ResponseInspectorSheet(
                 version = "1.0.7",
@@ -879,13 +1027,10 @@ fun MainAppScreen(
         }
 
 
-
-
-
-
         fun handleThemeChange(newTheme: String) {
             try {
                 onThemeChange(newTheme)
+                saveSetting("theme_setting", newTheme)
                 isThemeDialogOpen = false
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -898,66 +1043,101 @@ fun MainAppScreen(
         }
 
 
-        if (isThemeDialogOpen) {
-            ThemeSelectionDialog(
+
+
+        AnimatedVisibility(
+            visible = isThemeDialogOpen,
+            enter = fadeIn(animationSpec = tween(durationMillis = 300)) + slideInHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                initialOffsetX = { fullWidth -> fullWidth }
+            ),
+            exit = fadeOut(animationSpec = tween(durationMillis = 300)) + slideOutHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                targetOffsetX = { fullWidth -> fullWidth }
+            )
+        ) {
+
+            BackHandler(enabled = isThemeDialogOpen) {
+                isThemeDialogOpen = false
+            }
+
+            ThemeSelectionScreen(
                 themeSetting = themeSetting,
                 textColorPrimary = palette.textPrimary,
                 textColorSecondary = palette.textSecondary,
                 containerColor = palette.bgSecondary,
-                onThemeSelected = { selectedTheme ->
-                    handleThemeChange(selectedTheme)
+                onThemeSelected = { themeCode ->
+                    handleThemeChange(themeCode)
                 },
-                onDismissRequest = { isThemeDialogOpen = false }
+                onBackClick = { isThemeDialogOpen = false }
+            )
+        }
+
+
+
+
+        fun saveLanguage(lang: String, context: Context) {
+            try {
+
+                context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE).edit {
+                    putString("app_lang", lang)
+                }
+
+
+                currentLanguage = lang
+                isLanguageDialogOpen = false
+
+
+                if (context is android.app.Activity) {
+                    context.intent?.let { intent ->
+                        context.finish()
+                        context.startActivity(intent)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(
+                    context,
+                    "Ошибка смены языка",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+
+
+        AnimatedVisibility(
+            visible = isLanguageDialogOpen,
+            enter = fadeIn(animationSpec = tween(durationMillis = 300)) + slideInHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                initialOffsetX = { fullWidth -> fullWidth }
+            ),
+            exit = fadeOut(animationSpec = tween(durationMillis = 300)) + slideOutHorizontally(
+                animationSpec = tween(durationMillis = 300),
+                targetOffsetX = { fullWidth -> fullWidth }
+            )
+        ) {
+
+            BackHandler(enabled = isLanguageDialogOpen) {
+                isLanguageDialogOpen = false
+            }
+
+            LanguageSelectionScreen(
+                textColorPrimary = palette.textPrimary,
+                textColorSecondary = palette.textSecondary,
+                containerColor = palette.bgSecondary,
+                currentLanguage = currentLanguage,
+                onLanguageSelected = { selectedLang ->
+                    saveLanguage(selectedLang, context)
+                },
+                onBackClick = { isLanguageDialogOpen = false }
             )
         }
     }
-
-
-
-
-    fun saveLanguage(lang: String, context: Context) {
-        try {
-
-            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .edit()
-                .putString("app_lang", lang)
-                .apply()
-
-            currentLanguage = lang
-            isLanguageDialogOpen = false
-
-
-            if (context is android.app.Activity) {
-                context.intent?.let { intent ->
-                    context.finish()
-                    context.startActivity(intent)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            android.widget.Toast.makeText(
-                context,
-                "Ошибка смены языка",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-
-
-    if (isLanguageDialogOpen) {
-        LanguageSelectionDialog(
-            currentLanguage = currentLanguage,
-            textColorPrimary = palette.textPrimary,
-            textColorSecondary = palette.textSecondary,
-            containerColor = palette.bgSecondary,
-            onLanguageSelected = { selectedLang ->
-                saveLanguage(selectedLang, context)
-            },
-            onDismissRequest = { isLanguageDialogOpen = false }
-        )
-    }
 }
+
+
+
 
 
 

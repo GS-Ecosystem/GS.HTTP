@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -56,13 +55,6 @@ fun ResponseInspectorSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Box(
-                modifier = Modifier
-                    .size(width = 40.dp, height = 4.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(textColorPrimary.copy(alpha = 0.2f))
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.inspector_title),
@@ -73,28 +65,43 @@ fun ResponseInspectorSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
 
+
+            val isBrowserEnabled = lastValidUrl.isNotBlank()
+
             Button(
                 onClick = {
-                    try {
-
-                        val browserIntent = android.content.Intent(
-                            android.content.Intent.ACTION_VIEW,
-                            android.net.Uri.parse(lastValidUrl)
-                        )
-                        context.startActivity(browserIntent)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    if (isBrowserEnabled) {
+                        try {
+                            val browserIntent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(lastValidUrl)
+                            )
+                            context.startActivity(browserIntent)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 },
+                enabled = isBrowserEnabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = bgColor.copy(alpha = 0.1f),
-                    contentColor = MaterialTheme.colorScheme.onBackground
+
+                    containerColor = textColorPrimary,
+
+                    contentColor = bgColor,
+
+                    disabledContainerColor = textColorPrimary.copy(alpha = 0.05f),
+
+                    disabledContentColor = textColorPrimary.copy(alpha = 0.3f)
                 ),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .border(1.dp, lineColor, RoundedCornerShape(12.dp))
+                    .border(
+                        1.dp,
+                        if (isBrowserEnabled) textColorPrimary else lineColor.copy(alpha = 0.2f),
+                        RoundedCornerShape(12.dp)
+                    )
             ) {
                 Text(
                     text = stringResource(R.string.btn_open_browser_emoji),
@@ -102,14 +109,15 @@ fun ResponseInspectorSheet(
                     fontSize = 13.sp
                 )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(lineColor.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
-                    .padding(2.dp),
+                    .background(lineColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                    .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 listOf("Body", "Headers", "Cookies").forEach { tab ->
@@ -119,19 +127,25 @@ fun ResponseInspectorSheet(
                         modifier = Modifier
                             .weight(1f)
                             .background(
-                                if (isSelected) bgColor else Color.Transparent,
+
+                                if (isSelected) textColorPrimary else Color.Transparent,
                                 RoundedCornerShape(6.dp)
-                            )
+                            ),
+                        colors = ButtonDefaults.textButtonColors(
+
+                            contentColor = if (isSelected) bgColor else textColorPrimary.copy(alpha = 0.5f)
+                        )
                     ) {
                         Text(
                             text = tab,
-                            color = textColorPrimary,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 }
             }
+
+
             Spacer(modifier = Modifier.height(12.dp))
 
 

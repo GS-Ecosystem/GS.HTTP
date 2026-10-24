@@ -63,6 +63,9 @@
     <string name="body_empty">Тело ответа пусто</string>
     <string name="no_data">Нет данных</string>
     <string name="default_user">По умолчанию</string>
+    <string name="developer_site">Сайт разработчика</string>
+
+    <string name="exit_swipe">Смахните ещё раз для выхода</string>
 
 
     <string name="cancel">Отмена</string>

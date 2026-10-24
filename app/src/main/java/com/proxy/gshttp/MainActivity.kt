@@ -40,7 +40,21 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            var appThemeSetting by remember { mutableStateOf("system") }
+            var appThemeSetting by remember {
+                mutableStateOf(prefs.getString("theme_setting", "system") ?: "system")
+            }
+
+
+            val toggleTheme: (String) -> Unit = { selectedTheme ->
+                appThemeSetting = selectedTheme
+                try {
+                    prefs.edit().putString("theme_setting", selectedTheme).apply()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+
 
             val isDarkTheme = when (appThemeSetting) {
                 "dark" -> true

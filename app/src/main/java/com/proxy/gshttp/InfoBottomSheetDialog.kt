@@ -53,42 +53,32 @@ fun InfoBottomSheetDialog(
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(25.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(25.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Box(
-                modifier = Modifier.size(width = 40.dp, height = 4.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(textColorPrimary.copy(alpha = 0.2f))
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            Text(
-                text = stringResource(R.string.info),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = textColorPrimary
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(textColorPrimary),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_gs_ht),
-                    contentDescription = "Аватар",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                Text(
+                    text = stringResource(R.string.info),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    color = textColorPrimary
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Text(
+                    text = "GS HTTP",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    color = textColorPrimary
                 )
             }
-            Text(
-                "GS HTTP",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = textColorPrimary
-            )
+            Spacer(modifier = Modifier.height(16.dp))
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.developer),
@@ -96,20 +86,21 @@ fun InfoBottomSheetDialog(
                 color = textColorSecondary
             )
             Text(
-                text = "${stringResource(R.string.version)}: $version",
-                fontSize = 12.sp,
-                color = textColorPrimary
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
                 text = stringResource(R.string.downloaded_from),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color = textColorSecondary
             )
+            Text(
+                text = "${stringResource(R.string.version)}: $version",
+                fontSize = 12.sp,
+                color = textColorPrimary
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Divider(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
                 thickness = 1.dp,
                 color = lineColor
             )
@@ -127,7 +118,9 @@ fun InfoBottomSheetDialog(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Divider(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
                 thickness = 1.dp,
                 color = lineColor
             )
@@ -155,7 +148,33 @@ fun InfoBottomSheetDialog(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                thickness = 1.dp,
+                color = lineColor
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            TextButton(onClick = {
+                uriHandler.openUri("https://gs-ht.ru")
+
+            }) {
+                    Text(
+                        text = stringResource(R.string.developer_site),
+                        color = textColorPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
-}
+
+
+

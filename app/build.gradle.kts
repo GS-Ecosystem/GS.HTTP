@@ -1,9 +1,12 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    // ... если есть другие плагины, тоже оставь их без версий
 }
+
 
 android {
     namespace = "com.proxy.gshttp"
@@ -29,8 +32,8 @@ android {
         applicationId = "com.proxy.gshttp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.6"
+        versionCode = 7
+        versionName = "1.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
