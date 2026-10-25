@@ -9,7 +9,7 @@
     <string name="ssl_section">Безопасность и SSL</string>
     <string name="developer">Разработчик: Георгий Смердов</string>
     <string name="version">Версия</string>
-    <string name="downloaded_from">Скачано: RuStore</string>
+    <string name="downloaded_from">Скачано: GitHub</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="source_code">Исходный код</string>
 
