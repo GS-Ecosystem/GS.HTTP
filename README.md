@@ -1,5 +1,6 @@
 # GS.HTTP
 GS HTTP is a lightweight and fast utility designed for checking HTTP requests.
+* [**GS.HTTP** on apksalad(Unofficial)](https://apksalad.app/gs-http)
 * [**GS.HTTP** on APKPure](https://apkpure.com/ru/gs-http/com.proxy.gshttp)
 * [**GS.HTTP** on RuStore](https://www.rustore.ru/catalog/app/com.proxy.gshttp)
 * [**GS.HTTP** on GitHub -> Releases](https://github.com/GS-Ecosystem/GS.HTTP/releases/tag/v1.0.7)
